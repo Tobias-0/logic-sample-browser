@@ -111,9 +111,10 @@ Under Electron the stub sees the real `window.api` and does nothing.
 
 ## Licence
 
-The app is MIT licensed — see [LICENSE](LICENSE).
+No licence is granted. The source is public to read, but all rights are reserved —
+it is not licensed for use, copying, modification or redistribution.
 
-It bundles the [Inter](https://rsms.me/inter/) typeface, which is licensed
-separately under the SIL Open Font License 1.1. That licence is included at
-[`renderer/fonts/Inter-OFL.txt`](renderer/fonts/Inter-OFL.txt) and applies to
-`renderer/fonts/inter.woff2` only.
+The bundled [Inter](https://rsms.me/inter/) typeface is the exception: it carries its
+own SIL Open Font License 1.1, included at
+[`renderer/fonts/Inter-OFL.txt`](renderer/fonts/Inter-OFL.txt), which governs
+`renderer/fonts/inter.woff2` regardless of the terms above.

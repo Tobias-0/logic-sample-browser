@@ -1,0 +1,14 @@
+{
+  "name": "sample-browser",
+  "version": "1.0.0",
+  "description": "Browse and filter a sample library, drag straight into Logic Pro",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "reindex": "node -e \"const{scan}=require('./scan');require('fs').writeFileSync('renderer/dev-library.json',JSON.stringify(scan(process.argv[1]||require('os').homedir()+'/Music/Logic/Splice/sounds/packs')))\""
+  },
+  "license": "MIT",
+  "dependencies": {
+    "electron": "^44.4.1"
+  }
+}

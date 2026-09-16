@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; media-src 'self' file: blob:; connect-src 'self' file: blob:; img-src 'self' data: blob:;" />
+<title>Sample Browser</title>
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="titlebar">
+    <div class="titlebar-drag"></div>
+    <div class="brand">Samples</div>
+    <div class="search-wrap">
+      <input id="search" type="search" placeholder="Search name, pack, folder…" autocomplete="off" spellcheck="false" />
+      <kbd>⌘F</kbd>
+    </div>
+    <div class="titlebar-right">
+      <span id="count" class="count">—</span>
+      <button id="rescan" class="ghost-btn" title="Rescan library">Rescan</button>
+      <div class="settings-wrap">
+        <button id="settings" class="ghost-btn icon-btn" title="Settings" aria-haspopup="dialog" aria-expanded="false">
+          <svg viewBox="0 0 16 16" aria-hidden="true">
+            <path d="M2 4.5h4M10 4.5h4M2 11.5h2M8 11.5h6" stroke-width="1.3" fill="none" stroke-linecap="round"/>
+            <circle cx="8" cy="4.5" r="1.9"/>
+            <circle cx="6" cy="11.5" r="1.9"/>
+          </svg>
+        </button>
+        <div id="settings-panel" class="panel" role="dialog" aria-label="Settings" hidden>
+          <h3>Appearance</h3>
+          <div id="theme-seg" class="seg">
+            <button type="button" data-theme-choice="system">System</button>
+            <button type="button" data-theme-choice="light">Light</button>
+            <button type="button" data-theme-choice="dark">Dark</button>
+          </div>
+          <hr />
+          <h3>Library</h3>
+          <div id="panel-path" class="panel-path">—</div>
+          <div class="panel-actions">
+            <button id="choose" class="ghost-btn" title="Choose a different sample folder">Change folder…</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <aside id="sidebar">
+      <section class="facet">
+        <div class="facet-head"><h2>Type</h2></div>
+        <div id="f-format" class="chips"></div>
+      </section>
+
+      <section class="facet">
+        <div class="facet-head"><h2>BPM</h2><button class="clear" data-clear="bpm">Clear</button></div>
+        <div class="bpm">
+          <canvas id="bpm-hist" width="440" height="40"></canvas>
+          <div class="range">
+            <div class="range-track"><div id="range-fill" class="range-fill"></div></div>
+            <input id="bpm-min" type="range" min="60" max="200" value="60" />
+            <input id="bpm-max" type="range" min="60" max="200" value="200" />
+          </div>
+          <div class="bpm-vals">
+            <input id="bpm-min-n" type="number" min="60" max="200" value="60" />
+            <span class="dash">–</span>
+            <input id="bpm-max-n" type="number" min="60" max="200" value="200" />
+            <label class="tickbox"><input id="bpm-untagged" type="checkbox" checked /><span>incl. untagged</span></label>
+          </div>
+        </div>
+      </section>
+
+      <section class="facet">
+        <div class="facet-head"><h2>Note</h2><button class="clear" data-clear="note">Clear</button></div>
+        <div id="f-note" class="keys"></div>
+        <div id="f-scale" class="chips scale-chips"></div>
+      </section>
+
+      <section class="facet">
+        <div class="facet-head"><h2>Style</h2><button class="clear" data-clear="style">Clear</button></div>
+        <div id="f-style" class="list"></div>
+      </section>
+
+      <section class="facet">
+        <div class="facet-head"><h2>Pack</h2><button class="clear" data-clear="pack">Clear</button></div>
+        <input id="pack-search" class="mini-search" type="search" placeholder="Filter packs…" spellcheck="false" />
+        <div id="f-pack" class="list list-scroll"></div>
+      </section>
+    </aside>
+
+    <section id="results">
+      <div class="table-head">
+        <span class="col-fav"></span>
+        <button class="col-name sortable" data-sort="name">Name</button>
+        <button class="col-style sortable" data-sort="style">Style</button>
+        <button class="col-bpm sortable" data-sort="bpm">BPM</button>
+        <button class="col-key sortable" data-sort="note">Key</button>
+        <button class="col-len sortable" data-sort="duration">Length</button>
+        <button class="col-pack sortable" data-sort="pack">Pack</button>
+      </div>
+      <div id="scroller" class="scroller">
+        <div id="spacer"></div>
+        <div id="rows"></div>
+      </div>
+      <div id="empty" class="empty" hidden></div>
+    </section>
+  </main>
+
+  <footer id="player">
+    <button id="play" class="play-btn" aria-label="Play">
+      <svg viewBox="0 0 16 16" class="ico-play"><path d="M4 2.5 13 8l-9 5.5z"/></svg>
+      <svg viewBox="0 0 16 16" class="ico-pause"><path d="M4 2.5h3v11H4zM9 2.5h3v11H9z"/></svg>
+    </button>
+    <div class="now">
+      <div id="now-name" class="now-name">No sample selected</div>
+      <div id="now-meta" class="now-meta">Click a row to preview · drag it into Logic</div>
+    </div>
+    <div class="wave-wrap">
+      <canvas id="wave" height="48"></canvas>
+      <div id="playhead" class="playhead"></div>
+    </div>
+    <label class="tickbox auto"><input id="autoplay" type="checkbox" checked /><span>Auto‑preview</span></label>
+    <div class="vol">
+      <input id="volume" type="range" min="0" max="100" value="80" />
+    </div>
+    <button id="reveal" class="ghost-btn" title="Reveal in Finder">Finder</button>
+  </footer>
+
+  <div id="loading" class="loading"><div class="loading-inner"><div class="spinner"></div><div id="loading-text">Scanning library…</div></div></div>
+
+  <script src="dev-stub.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

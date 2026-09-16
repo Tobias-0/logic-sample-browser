@@ -1,0 +1,6 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    { "name": "ui-preview", "runtimeExecutable": "npx", "runtimeArgs": ["--yes", "http-server", "renderer", "-p", "4321", "-c-1", "--silent"], "port": 4321 }
+  ]
+}

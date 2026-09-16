@@ -15,7 +15,8 @@ npm start
 On first launch it scans the library and caches the index, so later launches open
 instantly. **Rescan** re-reads the folder after you add new packs.
 
-The **settings** button (top right) holds appearance and the library folder.
+The **settings** button (top right) holds appearance, auto-preview and the library
+folder.
 
 Default library path: `~/Music/Logic/Splice/sounds/packs`
 
@@ -24,6 +25,24 @@ Default library path: `~/Music/Logic/Splice/sounds/packs`
 Drag any row straight onto a Logic track. This is a real macOS file drag — Logic
 receives the actual file from your library, exactly as if you had dragged it out of
 Finder. Select several rows first (⌘-click or ⇧-click) to drag them as a group.
+
+## Project tempo
+
+Set your Logic project's tempo in the **Sync** box in the player bar, then pick
+**½**, **1×** or **2×**. Loops are then previewed at that tempo instead of their own,
+so everything you audition sits in the same groove as the track you're building.
+
+At 137 with 1×, a 124 BPM loop plays at 1.10× and a 174 BPM loop at 0.79× — both come
+out at 137. **½** and **2×** target half and double that (69 and 274), which is how you
+audition a loop that was written at a different feel: a 70 BPM loop needs a strained
+1.96× to reach 137, but at **½** it plays at 0.98× — practically untouched — because it
+was already half-time against your project.
+
+Pitch is preserved while stretching, so a sample you found by filtering on F# still
+sounds in F#. **Off** plays everything at its own tempo.
+
+Only loops with a detected tempo are stretched. One-shots have no tempo to match, and
+a loop whose tempo couldn't be read plays natively and says so rather than guessing.
 
 ## Appearance
 

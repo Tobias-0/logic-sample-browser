@@ -16,6 +16,7 @@ const state = {
   anchor: -1,
   playingPath: null,
   sort: { key: 'name', dir: 1 },
+  tempo: { bpm: 137, ratio: 'off' },   // ratio: 'off' | '0.5' | '1' | '2'
   filters: {
     q: '',
     format: null,        // 'Loop' | 'One-shot' | null
@@ -443,6 +444,26 @@ audio.preload = 'auto';
 let current = null;
 const peakCache = new Map();
 
+/* Project-tempo preview.
+   Only loops with a known tempo are stretched — a one-shot has no tempo to
+   match, and an unknown one would be a guess. Pitch is preserved, so a sample
+   you found by filtering on F# still sounds in F# after stretching. */
+function previewRate(s) {
+  const t = state.tempo;
+  if (!s || t.ratio === 'off') return 1;
+  if (s.format !== 'Loop' || !s.bpm || !t.bpm) return 1;
+  const rate = (t.bpm * Number(t.ratio)) / s.bpm;
+  return rate > 0 && isFinite(rate) ? rate : 1;
+}
+
+function applyRate() {
+  // Assigning a new src resets both of these, so they are set on every load.
+  audio.preservesPitch = true;
+  if ('webkitPreservesPitch' in audio) audio.webkitPreservesPitch = true;
+  audio.playbackRate = previewRate(current);
+}
+audio.addEventListener('loadedmetadata', applyRate);
+
 audio.addEventListener('play', () => document.body.classList.add('playing'));
 audio.addEventListener('pause', () => document.body.classList.remove('playing'));
 audio.addEventListener('ended', () => {
@@ -451,15 +472,32 @@ audio.addEventListener('ended', () => {
   renderRows(false);
 });
 
-function showNow(s) {
-  current = s;
-  $('now-name').textContent = s.name;
+function updateNowMeta() {
+  const s = current;
+  if (!s) return;
+  const rate = previewRate(s);
+  let tempoBit = null;
+  if (s.bpm) {
+    tempoBit = `${s.bpmSource === 'inferred' ? '~' : ''}${s.bpm} BPM`;
+    if (rate !== 1) {
+      const heard = Math.round(s.bpm * rate);
+      tempoBit += ` → ${heard} (${rate.toFixed(2)}×)`;
+    }
+  } else if (state.tempo.ratio !== 'off' && s.format === 'Loop') {
+    tempoBit = 'no tempo — playing native';
+  }
   $('now-meta').textContent = [
     s.pack,
-    s.bpm ? `${s.bpmSource === 'inferred' ? '~' : ''}${s.bpm} BPM` : null,
+    tempoBit,
     s.note ? s.note + (s.scale === 'min' ? ' min' : s.scale === 'maj' ? ' maj' : '') : null,
     s.sampleRate ? `${(s.sampleRate / 1000).toFixed(1)}k · ${s.bits}bit · ${s.channels === 2 ? 'stereo' : 'mono'}` : null,
   ].filter(Boolean).join('  ·  ');
+}
+
+function showNow(s) {
+  current = s;
+  $('now-name').textContent = s.name;
+  updateNowMeta();
   loadPeaks(s);
 }
 
@@ -467,6 +505,7 @@ function play(s) {
   state.playingPath = s.path;
   audio.src = fileURL(s.path);
   audio.currentTime = 0;
+  applyRate();
   audio.play().catch(() => {});
   renderRows(false);
 }
@@ -549,6 +588,35 @@ document.querySelector('.wave-wrap').onclick = (e) => {
   const r = e.currentTarget.getBoundingClientRect();
   audio.currentTime = ((e.clientX - r.left) / r.width) * audio.duration;
 };
+
+/* ------------------------------------------------------------------ *
+ * tempo controls
+ * ------------------------------------------------------------------ */
+function syncTempoUI() {
+  const t = state.tempo;
+  $('tempo-bpm').value = t.bpm;
+  for (const b of document.querySelectorAll('#tempo-seg button')) {
+    b.setAttribute('aria-pressed', String(b.dataset.ratio === t.ratio));
+  }
+  document.querySelector('.tempo').classList.toggle('off', t.ratio === 'off');
+  applyRate();       // takes effect mid-playback, no need to retrigger
+  updateNowMeta();
+  window.api.setState({ tempo: t });
+}
+
+for (const b of document.querySelectorAll('#tempo-seg button')) {
+  b.onclick = () => { state.tempo.ratio = b.dataset.ratio; syncTempoUI(); };
+}
+$('tempo-bpm').addEventListener('input', (e) => {
+  const v = parseInt(e.target.value, 10);
+  if (!isNaN(v) && v >= 40 && v <= 300) { state.tempo.bpm = v; syncTempoUI(); }
+});
+$('tempo-bpm').addEventListener('change', (e) => {
+  let v = parseInt(e.target.value, 10);
+  if (isNaN(v)) v = state.tempo.bpm;
+  state.tempo.bpm = Math.min(300, Math.max(40, v));
+  syncTempoUI();
+});
 
 /* ------------------------------------------------------------------ *
  * theme
@@ -647,6 +715,7 @@ document.querySelectorAll('.sortable').forEach((b) => {
   };
 });
 
+$('autoplay').addEventListener('change', (e) => window.api.setState({ autoplay: e.target.checked }));
 $('rescan').onclick = () => load(true);
 $('choose').onclick = async () => {
   const picked = await window.api.chooseRoot();
@@ -691,6 +760,9 @@ async function load(rescan) {
   const saved = await window.api.getState();
   state.favs = new Set(saved.favs || []);
   applyTheme(saved.theme || 'system');
+  if (saved.tempo && saved.tempo.bpm) state.tempo = { ...state.tempo, ...saved.tempo };
+  if (saved.autoplay === false) $('autoplay').checked = false;
+  syncTempoUI();
   const data = await window.api.loadLibrary({ rescan });
   state.all = data.samples.map((s) => ({
     ...s,

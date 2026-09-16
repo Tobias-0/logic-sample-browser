@@ -6,14 +6,31 @@ and dragging the result straight into Logic Pro X.
 It reads metadata out of the file names and WAV headers — nothing is moved, renamed
 or written into your library.
 
-## Run it
+## Install it
+
+Build a real macOS app:
+
+```bash
+npm run dist
+```
+
+That produces `dist/Sample Browser-1.0.0-arm64.dmg` and `dist/mac-arm64/Sample Browser.app`.
+Drag the app to `/Applications` and launch it like anything else — Dock icon, Spotlight,
+no terminal.
+
+The build is **ad-hoc signed**, not signed with an Apple Developer ID. It runs fine on
+this machine because it was built here. If you ever copy the `.dmg` to another Mac,
+macOS will quarantine it and you'll need to right-click → Open once to approve it.
+
+## Run it from source
 
 ```bash
 npm start
 ```
 
 On first launch it scans the library and caches the index, so later launches open
-instantly. **Rescan** re-reads the folder after you add new packs.
+instantly. The packaged app and `npm start` share that cache, along with your
+favourites and settings. **Rescan** re-reads the folder after you add new packs.
 
 The **settings** button (top right) holds appearance, auto-preview and the library
 folder.

@@ -5,11 +5,47 @@
   "main": "main.js",
   "scripts": {
     "start": "electron .",
-    "reindex": "node -e \"const{scan}=require('./scan');require('fs').writeFileSync('renderer/dev-library.json',JSON.stringify(scan(process.argv[1]||require('os').homedir()+'/Music/Logic/Splice/sounds/packs')))\""
+    "reindex": "node -e \"const{scan}=require('./scan');require('fs').writeFileSync('renderer/dev-library.json',JSON.stringify(scan(process.argv[1]||require('os').homedir()+'/Music/Logic/Splice/sounds/packs')))\"",
+    "dist": "electron-builder --mac"
   },
   "license": "UNLICENSED",
-  "dependencies": {
-    "electron": "^44.4.1"
+  "private": true,
+  "author": "Tobias",
+  "build": {
+    "appId": "com.tobias.samplebrowser",
+    "productName": "Sample Browser",
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "scan.js",
+      "renderer/**/*",
+      "assets/**/*",
+      "!renderer/dev-library.json"
+    ],
+    "mac": {
+      "category": "public.app-category.music",
+      "icon": "build/icon.icns",
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "arm64"
+          ]
+        }
+      ],
+      "identity": "-",
+      "gatekeeperAssess": false
+    },
+    "dmg": {
+      "title": "Sample Browser"
+    }
   },
-  "private": true
+  "devDependencies": {
+    "electron": "^44.4.1",
+    "electron-builder": "^26.15.3"
+  }
 }
